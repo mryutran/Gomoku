@@ -47,10 +47,23 @@ class GomokuApp {
 
         // Chat Toggle
         this.chatContainer = document.getElementById('chat-container');
+        this.chatHeader = document.getElementById('chat-header');
         this.btnToggleChat = document.getElementById('btn-toggle-chat');
+
+        const toggleChat = () => {
+            const isCollapsed = this.chatContainer.classList.toggle('collapsed');
+            if (this.btnToggleChat) {
+                this.btnToggleChat.textContent = isCollapsed ? '💬' : '✕';
+            }
+        };
+
+        if (this.chatHeader) {
+            this.chatHeader.addEventListener('click', toggleChat);
+        }
         if (this.btnToggleChat) {
-            this.btnToggleChat.addEventListener('click', () => {
-                this.chatContainer.classList.toggle('collapsed');
+            this.btnToggleChat.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent header click from firing
+                toggleChat();
             });
         }
 
@@ -65,9 +78,9 @@ class GomokuApp {
 
         document.querySelectorAll('.btn-reaction').forEach(btn => {
             btn.addEventListener('click', () => {
-                const reaction = btn.dataset.reaction;
-                if (reaction) {
-                    this.network.sendReaction(reaction);
+                const emoji = btn.dataset.emoji;
+                if (emoji) {
+                    this.network.sendReaction(emoji);
                 }
             });
         });
