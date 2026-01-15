@@ -50,7 +50,9 @@ class GomokuApp {
         this.chatHeader = document.getElementById('chat-header');
         this.btnToggleChat = document.getElementById('btn-toggle-chat');
 
-        const toggleChat = () => {
+        const toggleChat = (e) => {
+            if (e) e.stopPropagation();
+            if (!this.chatContainer) return;
             const isCollapsed = this.chatContainer.classList.toggle('collapsed');
             if (this.btnToggleChat) {
                 this.btnToggleChat.textContent = isCollapsed ? '💬' : '✕';
@@ -61,10 +63,7 @@ class GomokuApp {
             this.chatHeader.addEventListener('click', toggleChat);
         }
         if (this.btnToggleChat) {
-            this.btnToggleChat.addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent header click from firing
-                toggleChat();
-            });
+            this.btnToggleChat.addEventListener('click', toggleChat);
         }
 
         if (this.btnSendChat) {
@@ -78,7 +77,7 @@ class GomokuApp {
 
         document.querySelectorAll('.btn-reaction').forEach(btn => {
             btn.addEventListener('click', () => {
-                const emoji = btn.dataset.emoji;
+                const emoji = btn.getAttribute('data-emoji');
                 if (emoji) {
                     this.network.sendReaction(emoji);
                 }
@@ -242,26 +241,12 @@ class GomokuApp {
             if (Date.now() - data.timestamp < 3000) {
                 const overlay = pid === 'p1' ? this.p1Reaction : this.p2Reaction;
                 if (overlay) {
-                    const chibiImg = this.getChibiPath(data.reaction);
-                    // Use a wrapper class to help with "head-only" CSS cropping
-                    overlay.innerHTML = `<div class="chibi-head-crop"><img src="${chibiImg}" alt="reaction"></div>`;
+                    overlay.textContent = data.emoji || '😂'; // Text emoji only
                     overlay.classList.add('active');
                     setTimeout(() => overlay.classList.remove('active'), 2500);
                 }
             }
         });
-    }
-
-    getChibiPath(type) {
-        // Map reaction types to existing assets
-        // We'll use the avatar assets and crop them via CSS to show just the head
-        const mapping = {
-            'laughing': './assets/react_laughing.png',
-            'shocked': './assets/react_shocked.png',
-            'angry': './assets/p1.png',
-            'flexing': './assets/p2.png'
-        };
-        return mapping[type] || mapping['laughing'];
     }
 
     handleSendMessage() {
@@ -274,10 +259,10 @@ class GomokuApp {
         const myPid = this.network.playerId;
         const pRef = myPid === 'p1' ? this.p1Name : this.p2Name;
         if (pRef) {
-            // Get text before any <br> or <span>
             myName = pRef.innerText.split('\n')[0].trim();
         }
 
+        console.log("SENDING CHAT:", text, "FROM:", myName);
         this.network.sendMessage(text, myName);
         this.chatInput.value = '';
     }
