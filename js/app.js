@@ -44,14 +44,31 @@ class GomokuApp {
         this.rematchInfo = document.getElementById('rematch-info');
         this.btnRematch = document.getElementById('btn-rematch');
         this.btnModalLeave = document.getElementById('btn-modal-leave');
-        this.btnSendChat.addEventListener('click', () => this.handleSendMessage());
-        this.chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.handleSendMessage();
-        });
+
+        // Chat Toggle
+        this.chatContainer = document.getElementById('chat-container');
+        this.btnToggleChat = document.getElementById('btn-toggle-chat');
+        if (this.btnToggleChat) {
+            this.btnToggleChat.addEventListener('click', () => {
+                this.chatContainer.classList.toggle('collapsed');
+            });
+        }
+
+        if (this.btnSendChat) {
+            this.btnSendChat.addEventListener('click', () => this.handleSendMessage());
+        }
+        if (this.chatInput) {
+            this.chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') this.handleSendMessage();
+            });
+        }
 
         document.querySelectorAll('.btn-reaction').forEach(btn => {
             btn.addEventListener('click', () => {
-                this.network.sendReaction(btn.dataset.emoji);
+                const reaction = btn.dataset.reaction;
+                if (reaction) {
+                    this.network.sendReaction(reaction);
+                }
             });
         });
 
@@ -238,8 +255,17 @@ class GomokuApp {
         if (!this.chatInput) return;
         const text = this.chatInput.value.trim();
         if (!text) return;
-        const myName = this.network.playerId === 'p1' ? (this.p1Name?.textContent || 'P1') : (this.p2Name?.textContent || 'P2');
-        this.network.sendMessage(text, myName.split('\n')[0].split(' ')[0]);
+
+        // Extract plain name without extra HTML/badges
+        let myName = 'Bạn';
+        const myPid = this.network.playerId;
+        const pRef = myPid === 'p1' ? this.p1Name : this.p2Name;
+        if (pRef) {
+            // Get text before any <br> or <span>
+            myName = pRef.innerText.split('\n')[0].trim();
+        }
+
+        this.network.sendMessage(text, myName);
         this.chatInput.value = '';
     }
 
