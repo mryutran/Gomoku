@@ -117,6 +117,27 @@ export class NetworkManager {
         });
     }
 
+    async sendMessage(text, senderName) {
+        if (!this.roomRef) return;
+        const chatRef = ref(db, `rooms/${this.roomId}/chat`);
+        await push(chatRef, {
+            senderId: this.playerId,
+            senderName: senderName,
+            text: text,
+            timestamp: Date.now()
+        });
+    }
+
+    async sendReaction(emoji) {
+        if (!this.roomRef) return;
+        await update(this.roomRef, {
+            [`reactions/${this.playerId}`]: {
+                emoji: emoji,
+                timestamp: Date.now()
+            }
+        });
+    }
+
     async resetRoom() {
         if (!this.roomRef) return;
         await update(this.roomRef, {
@@ -125,7 +146,9 @@ export class NetworkManager {
             turn: 'p1',
             winner: null,
             lastMove: null,
-            rematch: null // Clear rematch status for new game
+            rematch: null, // Clear rematch status for new game
+            chat: null,    // Clear chat on game reset
+            reactions: null // Clear reactions
         });
     }
 

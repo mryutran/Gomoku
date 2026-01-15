@@ -21,6 +21,14 @@ class GomokuApp {
         this.createNameInput = document.getElementById('create-player-name');
         this.joinNameInput = document.getElementById('join-player-name');
 
+        // Chat & Reactions
+        this.chatMessages = document.getElementById('chat-messages');
+        this.chatInput = document.getElementById('chat-input');
+        this.btnSendChat = document.getElementById('btn-send-chat');
+        this.p1Reaction = this.p1Info ? this.p1Info.querySelector('.reaction-overlay') : null;
+        this.p2Reaction = this.p2Info ? this.p2Info.querySelector('.reaction-overlay') : null;
+        this.lastChatTimestamp = 0;
+
         if (this.p1Info) {
             this.p1Name = this.p1Info.querySelector('.name');
             this.p1Avatar = this.p1Info.querySelector('.avatar');
@@ -36,6 +44,16 @@ class GomokuApp {
         this.rematchInfo = document.getElementById('rematch-info');
         this.btnRematch = document.getElementById('btn-rematch');
         this.btnModalLeave = document.getElementById('btn-modal-leave');
+        this.btnSendChat.addEventListener('click', () => this.handleSendMessage());
+        this.chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.handleSendMessage();
+        });
+
+        document.querySelectorAll('.btn-reaction').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.network.sendReaction(btn.dataset.emoji);
+            });
+        });
 
         this.previousPlayers = null;
         this.initEventListeners();
