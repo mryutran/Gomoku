@@ -27,8 +27,15 @@ class GomokuApp {
         }
         if (this.p2Info) {
             this.p2Name = this.p2Info.querySelector('.name');
-            this.p2Avatar = this.p2Info.querySelector('.avatar');
+            this.p2Avatar = this.p2Info ? this.p2Info.querySelector('.avatar') : null;
         }
+
+        // Modal Elements
+        this.gameOverModal = document.getElementById('game-over-modal');
+        this.winnerText = document.getElementById('winner-text');
+        this.rematchInfo = document.getElementById('rematch-info');
+        this.btnRematch = document.getElementById('btn-rematch');
+        this.btnModalLeave = document.getElementById('btn-modal-leave');
 
         this.initEventListeners();
         this.renderBoard();
@@ -38,6 +45,8 @@ class GomokuApp {
         this.btnCreate.addEventListener('click', () => this.handleCreateRoom());
         this.btnJoin.addEventListener('click', () => this.handleJoinRoom());
         this.btnLeave.addEventListener('click', () => this.handleLeaveRoom());
+        this.btnModalLeave.addEventListener('click', () => this.handleLeaveRoom());
+        this.btnRematch.addEventListener('click', () => this.handleRematchRequest());
 
         this.boardEl.addEventListener('click', (e) => {
             const cell = e.target.closest('.cell');
@@ -81,6 +90,9 @@ class GomokuApp {
         this.network.leaveRoom();
         this.showMenuScreen();
         this.game.reset();
+        this.gameOverModal.classList.remove('active');
+        this.btnRematch.disabled = false;
+        this.btnRematch.textContent = "Chơi tiếp";
         this.renderBoard();
     }
 
@@ -115,11 +127,52 @@ class GomokuApp {
             if (data.players.p2) {
                 this.p2Name.textContent = data.players.p2.name;
                 this.p2Avatar.innerHTML = `<img src="./assets/p2.png?v=${Date.now()}" alt="P2 Avatar">`;
+                this.p2Info.classList.add('active'); // Ensure P2 looks active if joined
             } else {
                 this.p2Name.textContent = "Chờ người chơi...";
                 this.p2Avatar.innerHTML = 'O';
+                this.p2Info.classList.remove('active');
             }
         }
+
+        // Sync turn and status header
+        if (data.status === 'waiting') {
+            this.statusEl.textContent = "Đang chờ người chơi...";
+        } else if (data.status === 'playing') {
+            this.gameOverModal.classList.remove('active'); // Hide modal if game starts/resets
+            const currentTurnPlayer = data.turn === 'p1' ? (data.players?.p1?.name || 'P1') : (data.players?.p2?.name || 'P2');
+            const isMyTurn = data.turn === this.network.playerId;
+            this.statusEl.textContent = isMyTurn ? "Lượt của BẠN" : `Lượt của ${currentTurnPlayer}`;
+
+            // Highlight active player avatar glow
+            this.p1Info.classList.toggle('active', data.turn === 'p1');
+            this.p2Info.classList.toggle('active', data.turn === 'p2');
+        } else if (data.status === 'finished') {
+            const winnerName = data.winner === 'p1' ? (data.players?.p1?.name || 'P1') : (data.players?.p2?.name || 'P2');
+            this.statusEl.textContent = `${winnerName} thắng!`;
+            this.showWinModal(data);
+        }
+    }
+
+    showWinModal(data) {
+        const winnerName = data.winner === 'p1' ? (data.players?.p1?.name || 'P1') : (data.players?.p2?.name || 'P2');
+        this.winnerText.textContent = `${winnerName} CHIẾN THẮNG! 🏆`;
+        this.gameOverModal.classList.add('active');
+
+        // Update rematch status
+        const rematchCount = Object.values(data.rematch || {}).filter(v => v).length;
+        this.rematchInfo.textContent = `Sẵn sàng? (${rematchCount}/2)`;
+
+        // If both want rematch, one player (p1) triggers room reset
+        if (rematchCount === 2 && this.network.playerId === 'p1') {
+            this.network.resetRoom();
+        }
+    }
+
+    async handleRematchRequest() {
+        this.btnRematch.disabled = true;
+        this.btnRematch.textContent = "Đã sẵn sàng...";
+        await this.network.updateRematchStatus(this.network.playerId, true);
     }
 
     async handleCellClick(row, col) {

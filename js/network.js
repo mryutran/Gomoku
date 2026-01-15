@@ -81,6 +81,25 @@ export class NetworkManager {
         });
     }
 
+    async updateRematchStatus(playerId, wantsRematch) {
+        if (!this.roomRef) return;
+        await update(this.roomRef, {
+            [`rematch/${playerId}`]: wantsRematch
+        });
+    }
+
+    async resetRoom() {
+        if (!this.roomRef) return;
+        await update(this.roomRef, {
+            board: null,
+            status: 'playing',
+            turn: 'p1',
+            winner: null,
+            lastMove: null,
+            rematch: null // Clear rematch status for new game
+        });
+    }
+
     async getRoomData() {
         if (!this.roomRef) return null;
         const snapshot = await get(this.roomRef);
