@@ -132,7 +132,7 @@ input[type="text"] {
     background: rgba(0, 0, 0, 0.2);
     border: 1px solid var(--border-color);
     border-radius: 12px;
-    padding: 0 1rem;
+    padding: 12px 1rem;
     color: white;
     font-size: 1rem;
     flex: 1;

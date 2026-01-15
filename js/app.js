@@ -16,6 +16,8 @@ class GomokuApp {
         this.boardEl = document.getElementById('game-board');
         this.displayRoomId = document.getElementById('display-room-id');
         this.statusEl = document.getElementById('game-status');
+        this.p1Info = document.getElementById('p1-info');
+        this.p2Info = document.getElementById('p2-info');
         this.createNameInput = document.getElementById('create-player-name');
         this.joinNameInput = document.getElementById('join-player-name');
         this.p1Name = this.p1Info.querySelector('.name');
