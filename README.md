@@ -4,50 +4,54 @@ Chào mừng bạn đến với dự án Gomoku Online! Đây là ứng dụng c
 
 ## Hướng dẫn thiết lập Secrets trên GitHub (QUAN TRỌNG)
 
-Để tránh lộ API Key và giải quyết cảnh báo bảo mật từ GitHub, bạn cần cấu hình các **Secrets** trong repository của mình:
+Để tránh lộ API Key và bảo vệ dự án, bạn cần cấu hình các **Secrets** trong repository của mình trên GitHub. 
+
+### Các bước thực hiện:
 
 1. Truy cập repository của bạn trên GitHub.
 2. Chọn **Settings** > **Secrets and variables** > **Actions**.
-3. Nhấn **New repository secret** và thêm từng biến sau đây với giá trị tương ứng từ project của bạn:
+3. Nhấn **New repository secret** và thêm các biến dưới đây.
 
-| Tên Secret | Giá trị mẫu (Thay bằng của bạn) |
+### Danh sách các Secret cần thêm:
+
+Bạn lấy các giá trị này từ phần **Project Settings** trong Firebase Console (xem hướng dẫn bên dưới):
+
+| Tên Secret trên GitHub | Giá trị tương ứng từ Firebase Config |
 | :--- | :--- |
-| `FIREBASE_API_KEY` | `AIzaSyA8hhTyeavWEzLjE7HwYqXNbAjKrc9AlqQ` |
-| `FIREBASE_AUTH_DOMAIN` | `gomoku-3f1a8.firebaseapp.com` |
-| `FIREBASE_DATABASE_URL` | `https://gomoku-3f1a8-default-rtdb.asia-southeast1.firebasedatabase.app` |
-| `FIREBASE_PROJECT_ID` | `gomoku-3f1a8` |
-| `FIREBASE_STORAGE_BUCKET` | `gomoku-3f1a8.firebasestorage.app` |
-| `FIREBASE_MESSAGING_SENDER_ID` | `539760004171` |
-| `FIREBASE_APP_ID` | `1:539760004171:web:130477b3e733ac211991ce` |
+| `FIREBASE_API_KEY` | `apiKey` |
+| `FIREBASE_AUTH_DOMAIN` | `authDomain` |
+| `FIREBASE_DATABASE_URL` | `databaseURL` |
+| `FIREBASE_PROJECT_ID` | `projectId` |
+| `FIREBASE_STORAGE_BUCKET` | `storageBucket` |
+| `FIREBASE_MESSAGING_SENDER_ID` | `messagingSenderId` |
+| `FIREBASE_APP_ID` | `appId` |
 
 ---
 
-## Hướng dẫn thiết lập Firebase
-
-Nếu bạn chưa có project Firebase, hãy làm theo các bước sau:
+## Hướng dẫn lấy thông tin thiết lập Firebase
 
 ### Bước 1: Tạo Dự án Firebase
 1. Truy cập [Firebase Console](https://console.firebase.google.com/).
-2. Nhấn **Add project**, đặt tên và nhấn **Continue**.
+2. Nhấn **Add project**, đặt tên và tạo dự án.
 
 ### Bước 2: Tạo Realtime Database
-1. Trong menu bên trái, chọn **Build** > **Realtime Database**.
-2. Nhấn **Create Database**.
-3. Chọn vị trí server (**Singapore - asia-southeast1**).
-4. Chọn **Start in test mode** và nhấn **Enable**.
+1. Chọn **Build** > **Realtime Database** > **Create Database**.
+2. Chọn vị trí server (**Singapore - asia-southeast1**) để có tốc độ tốt nhất.
+3. Chọn **Start in test mode** để có thể chạy ngay.
 
-### Bước 3: Lấy App Settings
-1. Nhấn vào biểu tượng ⚙️ (Project settings).
-2. Ở phần **Your apps**, thêm app Web (`</>`) và copy đoạn mã `firebaseConfig` để lấy các giá trị điền vào GitHub Secrets ở trên.
+### Bước 3: Lấy App Settings (Config)
+1. Nhấn vào biểu tượng ⚙️ (Project settings) ở menu bên trái.
+2. Cuộn xuống phần **Your apps**, nếu chưa có app nào thì nhấn biểu tượng Web (`</>`) để tạo.
+3. Sau khi tạo, Firebase sẽ hiển thị đoạn mã `const firebaseConfig = { ... }`.
+4. Hãy copy các giá trị trong dấu ngoặc nhọn `{}` để điền vào GitHub Secrets tương ứng ở bảng trên.
 
 ---
 
 ## Tự động Deploy lên GitHub Pages
 
-1. Đưa code lên GitHub.
-2. Truy cập **Settings** > **Pages**.
-3. Chọn **GitHub Actions** làm source.
-4. Mỗi khi bạn `git push`, code sẽ tự động được inject secrets và deploy lên web.
+Dự án đã được thiết lập GitHub Actions. Mỗi khi bạn `git push` lên nhánh `main`, hệ thống sẽ tự động thay thế các placeholder bằng Secrets bạn đã cấu hình và deploy lên GitHub Pages.
 
 ## Cách chạy Local để Test
-Vì code hiện tại sử dụng placeholders, bạn cần tạo một file `js/firebase-config-local.js` (không push lên git) hoặc tạm thời điền key thật vào `js/firebase-config.js` để test local. Đừng quên revert lại placeholders trước khi push!
+Vì code hiện tại sử dụng placeholders cho bảo mật, bạn không thể chạy trực tiếp nếu không điền key vào `js/firebase-config.js`. 
+> [!TIP]
+> Bạn có thể tạm thời điền key thật vào file để test local, nhưng **đừng commit** file đó. GitHub sẽ tự động điền key thật khi deploy production.
