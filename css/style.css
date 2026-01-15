@@ -344,15 +344,17 @@ input[type="text"]:focus {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) scale(0);
-    font-size: 8rem;
-    /* Twice the avatar size roughly */
     z-index: 100;
     pointer-events: none;
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    font-size: 6rem;
+    /* Large enough to be expressive */
+    text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 .reaction-overlay.active {
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 1;
 }
 
 /* Chat Styles */
