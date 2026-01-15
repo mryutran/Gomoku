@@ -21,10 +21,18 @@
                 <p class="subtitle">Trận chiến Cờ Caro trực tuyến</p>
 
                 <div class="menu-actions">
-                    <button id="btn-create-room" class="btn btn-primary">Tạo Phòng Mới</button>
+                    <div class="input-group">
+                        <input type="text" id="create-player-name" placeholder="Tên của bạn" maxlength="15">
+                        <button id="btn-create-room" class="btn btn-primary">Tạo Phòng Mới</button>
+                    </div>
+
                     <div class="divider"><span>HOẶC</span></div>
+
                     <div class="join-action">
-                        <input type="text" id="join-room-id" placeholder="Nhập mã phòng (4 số)" maxlength="4">
+                        <div class="input-group">
+                            <input type="text" id="join-player-name" placeholder="Tên của bạn" maxlength="15">
+                            <input type="text" id="join-room-id" placeholder="Mã phòng (4 số)" maxlength="4">
+                        </div>
                         <button id="btn-join-room" class="btn btn-secondary">Vào Chơi</button>
                     </div>
                 </div>

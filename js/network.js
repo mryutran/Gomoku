@@ -8,14 +8,16 @@ export class NetworkManager {
         this.roomRef = null;
     }
 
-    async createRoom() {
+    async createRoom(playerName) {
         const id = Math.floor(1000 + Math.random() * 9000).toString();
         this.roomId = id;
         this.playerId = 'p1';
         this.roomRef = ref(db, `rooms/${id}`);
 
         const initialRoomState = {
-            players: { p1: true },
+            players: {
+                p1: { name: playerName || 'Người chơi 1', online: true }
+            },
             status: 'waiting',
             board: null,
             turn: 'p1',
@@ -27,7 +29,7 @@ export class NetworkManager {
         return id;
     }
 
-    async joinRoom(id) {
+    async joinRoom(id, playerName) {
         const snapshot = await get(ref(db, `rooms/${id}`));
         if (!snapshot.exists()) {
             throw new Error("Phòng không tồn tại!");
@@ -43,7 +45,7 @@ export class NetworkManager {
         this.roomRef = ref(db, `rooms/${id}`);
 
         await update(this.roomRef, {
-            'players/p2': true,
+            'players/p2': { name: playerName || 'Người chơi 2', online: true },
             'status': 'playing'
         });
 
@@ -77,6 +79,12 @@ export class NetworkManager {
             status: 'finished',
             winner: player
         });
+    }
+
+    async getRoomData() {
+        if (!this.roomRef) return null;
+        const snapshot = await get(this.roomRef);
+        return snapshot.exists() ? snapshot.val() : null;
     }
 
     async leaveRoom() {

@@ -53,8 +53,15 @@ body {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Glass Panel Styling */
@@ -105,7 +112,8 @@ body {
     margin: 0.5rem 0;
 }
 
-.divider::before, .divider::after {
+.divider::before,
+.divider::after {
     content: '';
     flex: 1;
     border-bottom: 1px solid var(--border-color);
@@ -264,67 +272,137 @@ input[type="text"]:focus {
     box-shadow: 0 0 30px var(--p2-glow);
 }
 
+/* Avatar and Input Styles */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 18px;
+}
+
 .player-info .name {
-    font-weight: 600;
-    white-space: nowrap;
+    font-weight: 700;
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    color: white;
 }
 
 /* Game Board */
+/* Board Components */
 .board-container {
-    background: #161b22;
-    padding: 10px;
-    border-radius: 12px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-    border: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 #game-board {
     display: grid;
-    grid-template-columns: repeat(15, 30px);
-    grid-template-rows: repeat(15, 30px);
-    background: #21262d;
+    grid-template-columns: repeat(15, 1fr);
+    grid-template-rows: repeat(15, 1fr);
     gap: 1px;
-    border: 1px solid #30363d;
+    background: #2c3e50;
+    border: 2px solid #34495e;
+    width: 600px;
+    height: 600px;
 }
 
 .cell {
-    width: 30px;
-    height: 30px;
-    background: #0d1117;
+    background: #ecf0f1;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: background 0.2s;
     position: relative;
+    transition: background 0.2s;
 }
 
 .cell:hover {
-    background: #161b22;
+    background: #fdfdfd;
 }
 
-/* Cell content (Stones) */
+.cell.winner {
+    background: #ffeaa7;
+    animation: pulse-winner 1.5s infinite;
+}
+
+/* Modern Game Pieces (Stones) */
 .stone {
-    width: 24px;
-    height: 24px;
+    width: 85%;
+    height: 85%;
     border-radius: 50%;
-    animation: stonePlace 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 20px;
+    animation: dropIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    user-select: none;
 }
 
-@keyframes stonePlace {
-    from { transform: scale(0.5); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
-
+/* X Piece - Neon Blue Gradient */
 .stone.x {
-    background: var(--p1-color);
-    box-shadow: 0 0 10px var(--p1-glow);
+    background: linear-gradient(145deg, #00d2ff, #3a7bd5);
+    color: white;
+    box-shadow: 0 4px 15px rgba(58, 123, 213, 0.4),
+        inset 0 -2px 5px rgba(0, 0, 0, 0.2);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     clip-path: polygon(20% 0%, 0% 20%, 30% 50%, 0% 80%, 20% 100%, 50% 70%, 80% 100%, 100% 80%, 70% 50%, 100% 20%, 80% 0%, 50% 30%);
 }
 
 .stone.o {
-    border: 5px solid var(--p2-color);
-    box-shadow: 0 0 10px var(--p2-glow);
+    background: linear-gradient(145deg, #ff0080, #ff8c00);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 0, 128, 0.4),
+        inset 0 -2px 5px rgba(0, 0, 0, 0.2);
+    border: none;
+}
+
+.stone.o::before {
+    content: '';
+    position: absolute;
+    width: 60%;
+    height: 60%;
+    border: 4px solid white;
+    border-radius: 50%;
+}
+
+@keyframes dropIn {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse-winner {
+    0% {
+        transform: scale(1);
+        background: rgba(88, 166, 255, 0.2);
+    }
+
+    50% {
+        transform: scale(1.05);
+        background: rgba(88, 166, 255, 0.4);
+    }
+
+    100% {
+        transform: scale(1);
+        background: rgba(88, 166, 255, 0.2);
+    }
 }
 
 /* Winning line highlight */
@@ -333,7 +411,7 @@ input[type="text"]:focus {
 }
 
 .game-footer {
-    padding-bottom: 2rem;
+    padding: 2rem;
 }
 
 /* Mobile Responsiveness */
@@ -342,13 +420,13 @@ input[type="text"]:focus {
         flex-direction: column;
         gap: 1.5rem;
     }
-    
+
     .player-info {
         flex-direction: row;
         width: 100%;
         justify-content: center;
     }
-    
+
     .player-info .avatar {
         width: 40px;
         height: 40px;

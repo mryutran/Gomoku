@@ -16,8 +16,12 @@ class GomokuApp {
         this.boardEl = document.getElementById('game-board');
         this.displayRoomId = document.getElementById('display-room-id');
         this.statusEl = document.getElementById('game-status');
-        this.p1Info = document.getElementById('p1-info');
-        this.p2Info = document.getElementById('p2-info');
+        this.createNameInput = document.getElementById('create-player-name');
+        this.joinNameInput = document.getElementById('join-player-name');
+        this.p1Name = this.p1Info.querySelector('.name');
+        this.p2Name = this.p2Info.querySelector('.name');
+        this.p1Avatar = this.p1Info.querySelector('.avatar');
+        this.p2Avatar = this.p2Info.querySelector('.avatar');
 
         this.initEventListeners();
         this.renderBoard();
@@ -39,8 +43,9 @@ class GomokuApp {
     }
 
     async handleCreateRoom() {
+        const name = this.createNameInput.value.trim();
         try {
-            const id = await this.network.createRoom();
+            const id = await this.network.createRoom(name);
             this.showGameScreen(id);
             this.network.onRoomUpdate((data) => this.handleRoomUpdate(data));
         } catch (error) {
@@ -49,6 +54,7 @@ class GomokuApp {
     }
 
     async handleJoinRoom() {
+        const name = this.joinNameInput.value.trim();
         const id = this.joinInput.value.trim();
         if (!id || id.length !== 4) {
             alert("Vui lòng nhập mã phòng 4 số!");
@@ -56,7 +62,7 @@ class GomokuApp {
         }
 
         try {
-            await this.network.joinRoom(id);
+            await this.network.joinRoom(id, name);
             this.showGameScreen(id);
             this.network.onRoomUpdate((data) => this.handleRoomUpdate(data));
         } catch (error) {
@@ -93,25 +99,19 @@ class GomokuApp {
         }
         this.renderBoard();
 
-        // Sync turn and status
-        if (data.status === 'waiting') {
-            this.statusEl.textContent = "Đang chờ người chơi...";
-        } else if (data.status === 'playing') {
-            const currentTurnPlayer = data.turn === 'p1' ? 'Người chơi 1' : 'Người chơi 2';
-            const isMyTurn = data.turn === this.network.playerId;
-            this.statusEl.textContent = isMyTurn ? "Lượt của BẠN" : `Lượt của ${currentTurnPlayer}`;
-
-            // Highlight active player
-            this.p1Info.classList.toggle('active', data.turn === 'p1');
-            this.p2Info.classList.toggle('active', data.turn === 'p2');
-        } else if (data.status === 'finished') {
-            const winnerName = data.winner === 'p1' ? 'Người chơi 1' : 'Người chơi 2';
-            this.statusEl.textContent = `${winnerName} thắng!`;
-            this.p1Info.classList.remove('active');
-            this.p2Info.classList.remove('active');
-
-            // Highlight winning line if local calculation matches
-            // (In a more robust version, winner and winning line would be in DB)
+        // Update player info
+        if (data.players) {
+            if (data.players.p1) {
+                this.p1Name.textContent = data.players.p1.name;
+                this.p1Avatar.innerHTML = '<img src="assets/p1.png" alt="P1 Avatar">';
+            }
+            if (data.players.p2) {
+                this.p2Name.textContent = data.players.p2.name;
+                this.p2Avatar.innerHTML = '<img src="assets/p2.png" alt="P2 Avatar">';
+            } else {
+                this.p2Name.textContent = "Chờ người chơi...";
+                this.p2Avatar.innerHTML = 'O';
+            }
         }
     }
 
@@ -120,7 +120,7 @@ class GomokuApp {
         if (this.game.gameOver) return;
 
         // We need the latest room state to check turn
-        const snapshot = await this.network.roomRef ? (await window.FirebaseSDK.get(this.network.roomRef)).val() : null;
+        const snapshot = await this.network.getRoomData();
         if (!snapshot || snapshot.status !== 'playing' || snapshot.turn !== this.network.playerId) {
             return;
         }
