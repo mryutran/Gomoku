@@ -20,12 +20,12 @@ export class GomokuGame {
         }
 
         this.board[row][col] = player;
-        
+
         if (this.checkWin(row, col, player)) {
             this.gameOver = true;
             this.winner = player;
         }
-        
+
         return true;
     }
 
@@ -62,9 +62,6 @@ export class GomokuGame {
             }
 
             // "Bị chặn 5 hai đầu vẫn thắng" 
-            // This means we only need 5 or more in a row.
-            // In some variants, 5 in a row blocked at both ends is NOT a win.
-            // But here, if count >= 5, it's a win regardless of blocks.
             if (count >= 5) {
                 this.winningLine = line;
                 return true;
@@ -72,6 +69,15 @@ export class GomokuGame {
         }
 
         return false;
+    }
+
+    checkDraw() {
+        for (let r = 0; r < this.size; r++) {
+            for (let c = 0; c < this.size; c++) {
+                if (this.board[r][c] === null) return false;
+            }
+        }
+        return true;
     }
 
     getBoardState() {

@@ -81,6 +81,14 @@ export class NetworkManager {
         });
     }
 
+    async setDraw() {
+        if (!this.roomRef) return;
+        await update(this.roomRef, {
+            status: 'finished',
+            winner: 'draw'
+        });
+    }
+
     async updateRematchStatus(playerId, wantsRematch) {
         if (!this.roomRef) return;
         await update(this.roomRef, {

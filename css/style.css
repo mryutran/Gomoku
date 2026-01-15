@@ -241,10 +241,13 @@ input[type="text"]:focus {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1rem;
+    justify-content: flex-start;
+    gap: 0.8rem;
     opacity: 0.4;
     transition: all 0.5s;
-    width: 120px;
+    width: 155px;
+    /* Consistent width */
+    text-align: center;
 }
 
 .player-info.active {
@@ -302,8 +305,11 @@ input[type="text"]:focus {
 .player-info .name {
     font-weight: 700;
     font-family: var(--font-heading);
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: white;
+    width: 120%;
+    /* Allow slightly more room for long names */
+    word-break: break-word;
 }
 
 /* Game Board */

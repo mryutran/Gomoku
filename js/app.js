@@ -139,7 +139,7 @@ class GomokuApp {
         if (data.status === 'waiting') {
             this.statusEl.textContent = "Đang chờ người chơi...";
         } else if (data.status === 'playing') {
-            this.gameOverModal.classList.remove('active'); // Hide modal if game starts/resets
+            this.gameOverModal.classList.remove('active');
             const currentTurnPlayer = data.turn === 'p1' ? (data.players?.p1?.name || 'P1') : (data.players?.p2?.name || 'P2');
             const isMyTurn = data.turn === this.network.playerId;
             this.statusEl.textContent = isMyTurn ? "Lượt của BẠN" : `Lượt của ${currentTurnPlayer}`;
@@ -148,15 +148,23 @@ class GomokuApp {
             this.p1Info.classList.toggle('active', data.turn === 'p1');
             this.p2Info.classList.toggle('active', data.turn === 'p2');
         } else if (data.status === 'finished') {
-            const winnerName = data.winner === 'p1' ? (data.players?.p1?.name || 'P1') : (data.players?.p2?.name || 'P2');
-            this.statusEl.textContent = `${winnerName} thắng!`;
+            if (data.winner === 'draw') {
+                this.statusEl.textContent = "TRẬN ĐẤU HÒA! 🤝";
+            } else {
+                const winnerName = data.winner === 'p1' ? (data.players?.p1?.name || 'P1') : (data.players?.p2?.name || 'P2');
+                this.statusEl.textContent = `${winnerName} CHIẾN THẮNG! 🏆`;
+            }
             this.showWinModal(data);
         }
     }
 
     showWinModal(data) {
-        const winnerName = data.winner === 'p1' ? (data.players?.p1?.name || 'P1') : (data.players?.p2?.name || 'P2');
-        this.winnerText.textContent = `${winnerName} CHIẾN THẮNG! 🏆`;
+        if (data.winner === 'draw') {
+            this.winnerText.textContent = "HÒA NHA! 🤝";
+        } else {
+            const winnerName = data.winner === 'p1' ? (data.players?.p1?.name || 'P1') : (data.players?.p2?.name || 'P2');
+            this.winnerText.textContent = `${winnerName} CHIẾN THẮNG! 🏆`;
+        }
         this.gameOverModal.classList.add('active');
 
         // Update rematch status
@@ -193,6 +201,8 @@ class GomokuApp {
             // Check if win (local check)
             if (this.game.gameOver) {
                 await this.network.setWinner(this.network.playerId);
+            } else if (this.game.checkDraw()) {
+                await this.network.setDraw();
             }
         }
     }
