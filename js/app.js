@@ -110,11 +110,11 @@ class GomokuApp {
         if (data.players) {
             if (data.players.p1) {
                 this.p1Name.textContent = data.players.p1.name;
-                this.p1Avatar.innerHTML = '<img src="assets/p1.png" alt="P1 Avatar">';
+                this.p1Avatar.innerHTML = `<img src="./assets/p1.png?v=${Date.now()}" alt="P1 Avatar">`;
             }
             if (data.players.p2) {
                 this.p2Name.textContent = data.players.p2.name;
-                this.p2Avatar.innerHTML = '<img src="assets/p2.png" alt="P2 Avatar">';
+                this.p2Avatar.innerHTML = `<img src="./assets/p2.png?v=${Date.now()}" alt="P2 Avatar">`;
             } else {
                 this.p2Name.textContent = "Chờ người chơi...";
                 this.p2Avatar.innerHTML = 'O';
