@@ -243,11 +243,38 @@ input[type="text"]:focus {
     align-items: center;
     justify-content: flex-start;
     gap: 0.8rem;
-    opacity: 0.4;
+    opacity: 0.3;
     transition: all 0.5s;
     width: 155px;
-    /* Consistent width */
     text-align: center;
+    padding: 1rem;
+    border-radius: 20px;
+    border: 2px solid transparent;
+    position: relative;
+}
+
+.player-info.joined {
+    opacity: 0.8;
+}
+
+.player-info.is-me {
+    opacity: 1;
+    background: rgba(88, 166, 255, 0.1);
+    border-color: rgba(88, 166, 255, 0.3);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+}
+
+.player-info.is-me::before {
+    content: 'NHÀ BẠN';
+    position: absolute;
+    top: -10px;
+    background: var(--accent-color);
+    color: #0d1117;
+    font-size: 0.6rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: bold;
+    z-index: 10;
 }
 
 .player-info.active {
@@ -325,11 +352,19 @@ input[type="text"]:focus {
 }
 
 .piece-label {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: var(--text-secondary);
-    font-weight: normal;
-    margin-top: 4px;
+    font-weight: 600;
+    margin-top: 8px;
     display: block;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px 8px;
+    border-radius: 8px;
+}
+
+.is-me .piece-label {
+    color: var(--accent-color);
+    background: rgba(88, 166, 255, 0.1);
 }
 
 /* Game Board */

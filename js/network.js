@@ -29,7 +29,7 @@ export class NetworkManager {
 
         // Handle disconnection: remove player and reset status if necessary
         const p1Ref = ref(db, `rooms/${id}/players/p1`);
-        onDisconnect(p1Ref).set(null); // Remove player on disconnect
+        onDisconnect(p1Ref).remove(); // Remove player on disconnect
 
         // If P1 leaves, we should also reset room status to waiting if it was playing
         // However, onDisconnect handles specific paths. 
@@ -45,22 +45,30 @@ export class NetworkManager {
         }
 
         const roomData = snapshot.val();
-        if (roomData.players.p2) {
-            throw new Error("Phòng đã đầy!");
-        }
+        const players = roomData.players || {};
+
+        let targetId = null;
+        if (!players.p1) targetId = 'p1';
+        else if (!players.p2) targetId = 'p2';
+        else throw new Error("Phòng đã đầy!");
 
         this.roomId = id;
-        this.playerId = 'p2';
+        this.playerId = targetId;
         this.roomRef = ref(db, `rooms/${id}`);
 
-        await update(this.roomRef, {
-            'players/p2': { name: playerName || 'Người chơi 2', online: true },
-            'status': 'playing'
-        });
+        const updates = {};
+        updates[`players/${targetId}`] = { name: playerName || `Người chơi ${targetId === 'p1' ? '1' : '2'}`, online: true };
+
+        // If both players are now present, set status to playing
+        if ((targetId === 'p1' && players.p2) || (targetId === 'p2' && players.p1)) {
+            updates['status'] = 'playing';
+        }
+
+        await update(this.roomRef, updates);
 
         // Handle disconnection
-        const p2Ref = ref(db, `rooms/${id}/players/p2`);
-        onDisconnect(p2Ref).set(null);
+        const pRef = ref(db, `rooms/${id}/players/${targetId}`);
+        onDisconnect(pRef).remove();
 
         return id;
     }

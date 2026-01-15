@@ -27,7 +27,7 @@ class GomokuApp {
         }
         if (this.p2Info) {
             this.p2Name = this.p2Info.querySelector('.name');
-            this.p2Avatar = this.p2Info ? this.p2Info.querySelector('.avatar') : null;
+            this.p2Avatar = this.p2Info.querySelector('.avatar');
         }
 
         // Modal Elements
@@ -167,7 +167,10 @@ class GomokuApp {
         const symbol = pid === 'p1' ? '✕' : '◯';
 
         if (pData) {
-            nameEl.innerHTML = `${pData.name} ${isMe ? '<span class="badge-me">(BẠN)</span>' : ''}<br><span class="piece-label">Quân ${symbol}</span>`;
+            info.classList.add('joined');
+            info.classList.toggle('is-me', isMe);
+
+            nameEl.innerHTML = `${pData.name} ${isMe ? '<span class="badge-me">BẠN</span>' : ''}<br><span class="piece-label">${symbol} Quân của ${isMe ? 'bạn' : pid}</span>`;
 
             // Only update avatar if image is missing to prevent flickering
             if (!avatarEl.querySelector('img')) {
@@ -175,7 +178,8 @@ class GomokuApp {
             }
             if (pid === 'p2') info.classList.add('active');
         } else {
-            nameEl.textContent = pid === 'p1' ? "Chờ người chơi..." : "Chờ người chơi...";
+            info.classList.remove('joined', 'is-me');
+            nameEl.textContent = "Chờ người chơi...";
             avatarEl.innerHTML = symbol;
             if (pid === 'p2') info.classList.remove('active');
         }
