@@ -116,7 +116,25 @@ export class NetworkManager {
 
     async leaveRoom() {
         if (!this.roomRef) return;
-        // In a real app, we might want to cleanup the room if both players leave
+
+        const updates = {};
+        updates[`players/${this.playerId}`] = null;
+
+        // If the room becomes empty, consider resetting status or cleaning up
+        // For now, if anyone leaves during 'playing', set status back to 'waiting'
+        const snapshot = await get(this.roomRef);
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            if (data.status === 'playing' || data.status === 'finished') {
+                updates['status'] = 'waiting';
+                updates['board'] = null;
+                updates['winner'] = null;
+                updates['rematch'] = null;
+            }
+        }
+
+        await update(this.roomRef, updates);
+
         this.roomId = null;
         this.playerId = null;
         this.roomRef = null;

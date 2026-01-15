@@ -37,6 +37,7 @@ class GomokuApp {
         this.btnRematch = document.getElementById('btn-rematch');
         this.btnModalLeave = document.getElementById('btn-modal-leave');
 
+        this.previousPlayers = null;
         this.initEventListeners();
         this.renderBoard();
     }
@@ -118,21 +119,21 @@ class GomokuApp {
         }
         this.renderBoard();
 
+        // Detect player departure
+        if (this.previousPlayers && data.status !== 'waiting') {
+            const opponentId = this.network.playerId === 'p1' ? 'p2' : 'p1';
+            if (this.previousPlayers[opponentId] && !data.players[opponentId]) {
+                const opponentName = this.previousPlayers[opponentId].name || 'Đối thủ';
+                alert(`${opponentName} vừa thoát phòng chơi, chờ người chơi mới.`);
+                this.gameOverModal.classList.remove('active'); // Close modal if open
+            }
+        }
+        this.previousPlayers = data.players;
+
         // Update player info
         if (data.players) {
-            if (data.players.p1) {
-                this.p1Name.textContent = data.players.p1.name;
-                this.p1Avatar.innerHTML = `<img src="./assets/p1.png?v=${Date.now()}" alt="P1 Avatar">`;
-            }
-            if (data.players.p2) {
-                this.p2Name.textContent = data.players.p2.name;
-                this.p2Avatar.innerHTML = `<img src="./assets/p2.png?v=${Date.now()}" alt="P2 Avatar">`;
-                this.p2Info.classList.add('active'); // Ensure P2 looks active if joined
-            } else {
-                this.p2Name.textContent = "Chờ người chơi...";
-                this.p2Avatar.innerHTML = 'O';
-                this.p2Info.classList.remove('active');
-            }
+            this.updatePlayerDisplay('p1', data.players.p1);
+            this.updatePlayerDisplay('p2', data.players.p2);
         }
 
         // Sync turn and status header
@@ -155,6 +156,28 @@ class GomokuApp {
                 this.statusEl.textContent = `${winnerName} CHIẾN THẮNG! 🏆`;
             }
             this.showWinModal(data);
+        }
+    }
+
+    updatePlayerDisplay(pid, pData) {
+        const info = pid === 'p1' ? this.p1Info : this.p2Info;
+        const nameEl = pid === 'p1' ? this.p1Name : this.p2Name;
+        const avatarEl = pid === 'p1' ? this.p1Avatar : this.p2Avatar;
+        const isMe = this.network.playerId === pid;
+        const symbol = pid === 'p1' ? '✕' : '◯';
+
+        if (pData) {
+            nameEl.innerHTML = `${pData.name} ${isMe ? '<span class="badge-me">BẠN</span>' : ''}<br><span class="piece-label">Quân ${symbol}</span>`;
+
+            // Only update avatar if image is missing to prevent flickering
+            if (!avatarEl.querySelector('img')) {
+                avatarEl.innerHTML = `<img src="./assets/${pid}.png" alt="${pid} Avatar">`;
+            }
+            if (pid === 'p2') info.classList.add('active');
+        } else {
+            nameEl.textContent = pid === 'p1' ? "Chờ người chơi..." : "Chờ người chơi...";
+            avatarEl.innerHTML = symbol;
+            if (pid === 'p2') info.classList.remove('active');
         }
     }
 

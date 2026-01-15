@@ -307,9 +307,29 @@ input[type="text"]:focus {
     font-family: var(--font-heading);
     font-size: 1.1rem;
     color: white;
-    width: 120%;
-    /* Allow slightly more room for long names */
+    width: 140%;
+    /* Increase further for badges */
     word-break: break-word;
+}
+
+.badge-me {
+    background: var(--primary-color);
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    vertical-align: middle;
+    margin-left: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.piece-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: normal;
+    margin-top: 4px;
+    display: block;
 }
 
 /* Game Board */
