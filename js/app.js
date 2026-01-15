@@ -20,10 +20,15 @@ class GomokuApp {
         this.p2Info = document.getElementById('p2-info');
         this.createNameInput = document.getElementById('create-player-name');
         this.joinNameInput = document.getElementById('join-player-name');
-        this.p1Name = this.p1Info.querySelector('.name');
-        this.p2Name = this.p2Info.querySelector('.name');
-        this.p1Avatar = this.p1Info.querySelector('.avatar');
-        this.p2Avatar = this.p2Info.querySelector('.avatar');
+
+        if (this.p1Info) {
+            this.p1Name = this.p1Info.querySelector('.name');
+            this.p1Avatar = this.p1Info.querySelector('.avatar');
+        }
+        if (this.p2Info) {
+            this.p2Name = this.p2Info.querySelector('.name');
+            this.p2Avatar = this.p2Info.querySelector('.avatar');
+        }
 
         this.initEventListeners();
         this.renderBoard();
