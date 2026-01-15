@@ -167,7 +167,7 @@ class GomokuApp {
         const symbol = pid === 'p1' ? '✕' : '◯';
 
         if (pData) {
-            nameEl.innerHTML = `${pData.name} ${isMe ? '<span class="badge-me">BẠN</span>' : ''}<br><span class="piece-label">Quân ${symbol}</span>`;
+            nameEl.innerHTML = `${pData.name} ${isMe ? '<span class="badge-me">(BẠN)</span>' : ''}<br><span class="piece-label">Quân ${symbol}</span>`;
 
             // Only update avatar if image is missing to prevent flickering
             if (!avatarEl.querySelector('img')) {

@@ -1,5 +1,5 @@
 import { db } from './firebase-config.js';
-import { ref, set, onValue, update, get } from './firebase-init.js';
+import { ref, set, onValue, update, get, onDisconnect, remove } from './firebase-init.js';
 
 export class NetworkManager {
     constructor() {
@@ -26,6 +26,15 @@ export class NetworkManager {
         };
 
         await set(this.roomRef, initialRoomState);
+
+        // Handle disconnection: remove player and reset status if necessary
+        const p1Ref = ref(db, `rooms/${id}/players/p1`);
+        onDisconnect(p1Ref).set(null); // Remove player on disconnect
+
+        // If P1 leaves, we should also reset room status to waiting if it was playing
+        // However, onDisconnect handles specific paths. 
+        // For simplicity, we just remove the player, and app.js handles the rest.
+
         return id;
     }
 
@@ -48,6 +57,10 @@ export class NetworkManager {
             'players/p2': { name: playerName || 'Người chơi 2', online: true },
             'status': 'playing'
         });
+
+        // Handle disconnection
+        const p2Ref = ref(db, `rooms/${id}/players/p2`);
+        onDisconnect(p2Ref).set(null);
 
         return id;
     }
