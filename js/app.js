@@ -175,12 +175,80 @@ class GomokuApp {
             }
             this.showWinModal(data);
         }
+
+        // Sync Chat
+        if (data.chat) {
+            this.updateChat(data.chat);
+        } else {
+            this.chatMessages.innerHTML = '';
+            this.lastChatTimestamp = 0;
+        }
+
+        // Sync Reactions
+        if (data.reactions) {
+            this.updateReactions(data.reactions);
+        }
+    }
+
+    updateChat(chatData) {
+        if (!this.chatMessages) return;
+        const messages = Object.values(chatData).sort((a, b) => a.timestamp - b.timestamp);
+        messages.forEach(msg => {
+            if (msg.timestamp > this.lastChatTimestamp) {
+                const msgEl = document.createElement('div');
+                msgEl.className = `chat-message ${msg.senderId === this.network.playerId ? 'me' : 'others'}`;
+                // Use cleaner formatting
+                msgEl.innerHTML = `<strong>${msg.senderName}:</strong> ${msg.text}`;
+                this.chatMessages.appendChild(msgEl);
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+                this.lastChatTimestamp = msg.timestamp;
+            }
+        });
+    }
+
+    updateReactions(reactions) {
+        Object.entries(reactions).forEach(([pid, data]) => {
+            // Only show if reaction is recent (last 3 seconds)
+            if (Date.now() - data.timestamp < 3000) {
+                const overlay = pid === 'p1' ? this.p1Reaction : this.p2Reaction;
+                if (overlay) {
+                    const chibiImg = this.getChibiPath(data.reaction);
+                    // Use a wrapper class to help with "head-only" CSS cropping
+                    overlay.innerHTML = `<div class="chibi-head-crop"><img src="${chibiImg}" alt="reaction"></div>`;
+                    overlay.classList.add('active');
+                    setTimeout(() => overlay.classList.remove('active'), 2500);
+                }
+            }
+        });
+    }
+
+    getChibiPath(type) {
+        // Map reaction types to existing assets
+        // We'll use the avatar assets and crop them via CSS to show just the head
+        const mapping = {
+            'laughing': './assets/react_laughing.png',
+            'shocked': './assets/react_shocked.png',
+            'angry': './assets/p1.png',
+            'flexing': './assets/p2.png'
+        };
+        return mapping[type] || mapping['laughing'];
+    }
+
+    handleSendMessage() {
+        if (!this.chatInput) return;
+        const text = this.chatInput.value.trim();
+        if (!text) return;
+        const myName = this.network.playerId === 'p1' ? (this.p1Name?.textContent || 'P1') : (this.p2Name?.textContent || 'P2');
+        this.network.sendMessage(text, myName.split('\n')[0].split(' ')[0]);
+        this.chatInput.value = '';
     }
 
     updatePlayerDisplay(pid, pData) {
         const info = pid === 'p1' ? this.p1Info : this.p2Info;
         const nameEl = pid === 'p1' ? this.p1Name : this.p2Name;
         const avatarEl = pid === 'p1' ? this.p1Avatar : this.p2Avatar;
+        if (!info || !nameEl || !avatarEl) return;
+
         const isMe = this.network.playerId === pid;
         const symbol = pid === 'p1' ? '✕' : '◯';
 
@@ -188,9 +256,9 @@ class GomokuApp {
             info.classList.add('joined');
             info.classList.toggle('is-me', isMe);
 
-            nameEl.innerHTML = `${pData.name} ${isMe ? '<span class="badge-me">BẠN</span>' : ''}<br><span class="piece-label">${symbol} Quân của ${isMe ? 'bạn' : pid}</span>`;
+            // Per USER request: no "BẠN" text, use real names in piece label
+            nameEl.innerHTML = `${pData.name}<br><span class="piece-label">${symbol} Quân của ${pData.name}</span>`;
 
-            // Only update avatar if image is missing to prevent flickering
             if (!avatarEl.querySelector('img')) {
                 avatarEl.innerHTML = `<img src="./assets/${pid}.png" alt="${pid} Avatar">`;
             }

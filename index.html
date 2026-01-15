@@ -49,9 +49,10 @@
             </div>
 
             <div class="game-layout">
-                <div class="player-info player-1 active" id="p1-info">
+                <div class="player-info player-1" id="p1-info">
                     <div class="avatar">X</div>
                     <div class="name">Người chơi 1</div>
+                    <div class="reaction-overlay"></div>
                 </div>
 
                 <div class="board-container">
@@ -61,6 +62,24 @@
                 <div class="player-info player-2" id="p2-info">
                     <div class="avatar">O</div>
                     <div class="name">Người chơi 2</div>
+                    <div class="reaction-overlay"></div>
+                </div>
+
+                <!-- Chat System -->
+                <div class="chat-container">
+                    <div id="chat-messages" class="chat-messages"></div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chat-input" placeholder="Nhắn tin...">
+                        <button id="btn-send-chat" class="btn btn-primary">Gửi</button>
+                    </div>
+                </div>
+
+                <!-- Reaction Bar -->
+                <div class="reaction-bar">
+                    <button class="btn-reaction" data-reaction="laughing">😂</button>
+                    <button class="btn-reaction" data-reaction="shocked">😲</button>
+                    <button class="btn-reaction" data-reaction="angry">😡</button>
+                    <button class="btn-reaction" data-reaction="flexing">💪</button>
                 </div>
             </div>
 
