@@ -8,7 +8,7 @@ export class NetworkManager {
         this.roomRef = null;
     }
 
-    async createRoom(playerName) {
+    async createRoom(playerName, playerUid) {
         const id = Math.floor(1000 + Math.random() * 9000).toString();
         this.roomId = id;
         this.playerId = 'p1';
@@ -16,7 +16,7 @@ export class NetworkManager {
 
         const initialRoomState = {
             players: {
-                p1: { name: playerName || 'Người chơi 1', online: true }
+                p1: { name: playerName || 'Người chơi 1', online: true, uid: playerUid }
             },
             status: 'waiting',
             board: null,
@@ -38,7 +38,7 @@ export class NetworkManager {
         return id;
     }
 
-    async joinRoom(id, playerName) {
+    async joinRoom(id, playerName, playerUid) {
         const snapshot = await get(ref(db, `rooms/${id}`));
         if (!snapshot.exists()) {
             throw new Error("Phòng không tồn tại!");
@@ -57,7 +57,11 @@ export class NetworkManager {
         this.roomRef = ref(db, `rooms/${id}`);
 
         const updates = {};
-        updates[`players/${targetId}`] = { name: playerName || `Người chơi ${targetId === 'p1' ? '1' : '2'}`, online: true };
+        updates[`players/${targetId}`] = {
+            name: playerName || `Người chơi ${targetId === 'p1' ? '1' : '2'}`,
+            online: true,
+            uid: playerUid
+        };
 
         // If both players are now present, set status to playing
         if ((targetId === 'p1' && players.p2) || (targetId === 'p2' && players.p1)) {

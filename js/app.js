@@ -92,6 +92,8 @@ class GomokuApp {
         });
 
         this.previousPlayers = null;
+        this.currentPlayerName = ''; // Added to track name reliably
+        this.playerUid = Math.random().toString(36).substring(2, 15); // Generate unique session ID
         this.setupDraggable();
         this.initEventListeners();
         this.renderBoard();
@@ -115,9 +117,10 @@ class GomokuApp {
     }
 
     async handleCreateRoom() {
-        const name = this.createNameInput.value.trim();
+        const name = this.createNameInput.value.trim() || 'Người chơi 1';
+        this.currentPlayerName = name; // Store name
         try {
-            const id = await this.network.createRoom(name);
+            const id = await this.network.createRoom(name, this.playerUid);
             this.showGameScreen(id);
             this.network.onRoomUpdate((data) => this.handleRoomUpdate(data));
         } catch (error) {
@@ -134,7 +137,9 @@ class GomokuApp {
         }
 
         try {
-            await this.network.joinRoom(id, name);
+            const finalName = name || 'Người chơi ' + (id % 2 === 0 ? '2' : '1'); // Helper default
+            this.currentPlayerName = finalName; // Store name
+            await this.network.joinRoom(id, finalName, this.playerUid);
             this.showGameScreen(id);
             this.network.onRoomUpdate((data) => this.handleRoomUpdate(data));
         } catch (error) {
@@ -164,6 +169,18 @@ class GomokuApp {
     }
 
     handleRoomUpdate(data) {
+        // Session Validation: Ensure my slot hasn't been taken by someone else
+        if (this.network.roomId && data.players) {
+            const myId = this.network.playerId;
+            const myDataInRoom = data.players[myId];
+
+            if (myDataInRoom && myDataInRoom.uid !== this.playerUid) {
+                alert("Phiên chơi của bạn đã hết hạn hoặc có người khác đã vào vị trí của bạn.");
+                this.handleLeaveRoom();
+                return;
+            }
+        }
+
         // Sync board
         this.game.reset();
         if (data.board) {
@@ -268,16 +285,8 @@ class GomokuApp {
         const text = this.chatInput.value.trim();
         if (!text) return;
 
-        // Extract plain name without extra HTML/badges
-        let myName = 'Bạn';
-        const myPid = this.network.playerId;
-        const pRef = myPid === 'p1' ? this.p1Name : this.p2Name;
-        if (pRef) {
-            myName = pRef.innerText.split('\n')[0].trim();
-        }
-
-        console.log("SENDING CHAT:", text, "FROM:", myName);
-        this.network.sendMessage(text, myName);
+        console.log("SENDING CHAT:", text, "FROM:", this.currentPlayerName);
+        this.network.sendMessage(text, this.currentPlayerName);
         this.chatInput.value = '';
     }
 
