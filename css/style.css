@@ -4,10 +4,12 @@
     --border-color: rgba(48, 54, 61, 0.8);
     --accent-color: #58a6ff;
     --accent-glow: rgba(88, 166, 255, 0.4);
-    --p1-color: #ff7b72;
-    --p1-glow: rgba(255, 123, 114, 0.4);
-    --p2-color: #79c0ff;
-    --p2-glow: rgba(121, 192, 255, 0.4);
+    --p1-color: #58a6ff;
+    /* Match Blue Astronaut */
+    --p1-glow: rgba(88, 166, 255, 0.4);
+    --p2-color: #ff7b72;
+    /* Match Red Girl */
+    --p2-glow: rgba(255, 123, 114, 0.4);
     --text-primary: #c9d1d9;
     --text-secondary: #8b949e;
     --font-main: 'Inter', sans-serif;
@@ -473,11 +475,6 @@ input[type="text"]:focus {
 
 /* Reaction Bar */
 .reaction-bar {
-    position: absolute;
-    bottom: 100px;
-    /* Move UP to avoid Leave Room button */
-    left: 50%;
-    transform: translateX(-50%);
     background: var(--panel-bg);
     backdrop-filter: blur(10px);
     border: 1px solid var(--border-color);
@@ -485,8 +482,8 @@ input[type="text"]:focus {
     border-radius: 40px;
     display: flex;
     gap: 15px;
-    z-index: 40;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    pointer-events: auto;
 }
 
 .btn-reaction {
@@ -637,7 +634,12 @@ input[type="text"]:focus {
 }
 
 .game-footer {
-    padding: 2rem;
+    padding: 1.5rem 2rem 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    width: 100%;
 }
 
 /* Modal Styling */
@@ -759,7 +761,6 @@ input[type="text"]:focus {
     }
 
     .reaction-bar {
-        bottom: 75px;
         padding: 4px 10px;
         gap: 8px;
     }
