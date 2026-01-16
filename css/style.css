@@ -24,8 +24,9 @@ body {
     background-color: var(--bg-color);
     color: var(--text-primary);
     font-family: var(--font-main);
-    overflow: hidden;
-    height: 100vh;
+    overflow-y: auto;
+    /* Allow scroll on mobile */
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -235,6 +236,7 @@ input[type="text"]:focus {
     gap: 3rem;
     width: 100%;
     padding: 2rem;
+    min-height: min-content;
 }
 
 .player-info {
@@ -533,8 +535,10 @@ input[type="text"]:focus {
     gap: 1px;
     background: #2c3e50;
     border: 2px solid #34495e;
-    width: 600px;
-    height: 600px;
+    width: min(600px, 92vw);
+    /* Responsive width */
+    height: min(600px, 92vw);
+    /* Responsive height (square) */
 }
 
 .cell {
@@ -696,19 +700,71 @@ input[type="text"]:focus {
 @media (max-width: 850px) {
     .game-layout {
         flex-direction: column;
-        gap: 1.5rem;
+        gap: 1rem;
+        padding: 1rem 0.5rem;
+    }
+
+    .board-container {
+        padding: 10px;
+        order: 2;
+        /* Put board in middle */
     }
 
     .player-info {
         flex-direction: row;
         width: 100%;
+        max-width: 400px;
         justify-content: center;
         min-height: auto;
+        padding: 8px;
+        gap: 10px;
+    }
+
+    .player-info.player-1 {
+        order: 1;
+    }
+
+    .player-info.player-2 {
+        order: 3;
     }
 
     .player-info .avatar {
-        width: 40px;
-        height: 40px;
+        width: 45px;
+        height: 45px;
+        font-size: 1.2rem;
+    }
+
+    .player-info .name {
+        text-align: left;
+        font-size: 0.85rem;
+        width: auto;
+    }
+
+    .piece-label {
+        margin-top: 2px;
+        font-size: 0.7rem;
+    }
+
+    .chat-container {
+        width: 90%;
+        left: 5%;
+        right: 5%;
+        bottom: 70px;
+    }
+
+    .chat-container.collapsed {
+        width: 120px;
+        left: auto;
+        right: 15px;
+    }
+
+    .reaction-bar {
+        bottom: 75px;
+        padding: 4px 10px;
+        gap: 8px;
+    }
+
+    .btn-reaction {
         font-size: 1.2rem;
     }
 }
