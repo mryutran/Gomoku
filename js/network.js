@@ -6,6 +6,7 @@ export class NetworkManager {
         this.roomId = null;
         this.playerId = null; // 'p1' or 'p2'
         this.roomRef = null;
+        this.unsubscribe = null; // Store listener cleanup function
     }
 
     async createRoom(playerName, playerUid) {
@@ -79,7 +80,14 @@ export class NetworkManager {
 
     onRoomUpdate(callback) {
         if (!this.roomRef) return;
-        onValue(this.roomRef, (snapshot) => {
+
+        // Cleanup existing listener if any
+        if (this.unsubscribe) {
+            this.unsubscribe();
+            this.unsubscribe = null;
+        }
+
+        this.unsubscribe = onValue(this.roomRef, (snapshot) => {
             if (snapshot.exists()) {
                 callback(snapshot.val());
             }
@@ -182,6 +190,12 @@ export class NetworkManager {
         }
 
         await update(this.roomRef, updates);
+
+        // Cleanup listener when leaving
+        if (this.unsubscribe) {
+            this.unsubscribe();
+            this.unsubscribe = null;
+        }
 
         this.roomId = null;
         this.playerId = null;
