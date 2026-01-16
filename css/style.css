@@ -99,6 +99,21 @@ body {
     font-size: 1.1rem;
 }
 
+.copyright {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    opacity: 0.6;
+    margin-bottom: 2rem;
+    line-height: 1.4;
+    font-weight: 500;
+}
+
+.game-copyright {
+    margin-top: 1rem;
+    margin-bottom: 0;
+    opacity: 0.4;
+}
+
 /* Menu Actions */
 .menu-actions {
     display: flex;
