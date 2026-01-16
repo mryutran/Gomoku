@@ -381,6 +381,11 @@ class GomokuApp {
         let startX, startY;
         let startLeft, startTop;
         let hasMoved = false;
+        let rafId = null;
+
+        // Cache container dimensions and viewport to avoid thrashing
+        let containerWidth, containerHeight;
+        let viewportWidth, viewportHeight;
 
         const onStart = (e) => {
             // Only allow dragging from header
@@ -398,9 +403,13 @@ class GomokuApp {
             const rect = this.chatContainer.getBoundingClientRect();
             startLeft = rect.left;
             startTop = rect.top;
+            containerWidth = rect.width;
+            containerHeight = rect.height;
 
-            // Switch to fixed positioning with left/top for easier dragging
-            // but only after a small movement to avoid breaking the initial CSS layout immediately
+            // Cache viewport dimensions
+            viewportWidth = window.innerWidth;
+            viewportHeight = window.innerHeight;
+
             this.chatContainer.classList.add('dragging');
 
             document.addEventListener('mousemove', onMove);
@@ -418,42 +427,35 @@ class GomokuApp {
             const dx = clientX - startX;
             const dy = clientY - startY;
 
-            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+            if (!hasMoved && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
                 hasMoved = true;
-                if (e.cancelable) e.preventDefault();
             }
 
             if (hasMoved) {
-                let newLeft = startLeft + dx;
-                let newTop = startTop + dy;
+                if (e.cancelable) e.preventDefault();
 
-                // Clamping
-                const rect = this.chatContainer.getBoundingClientRect();
-                const viewportWidth = window.innerWidth;
-                const viewportHeight = window.innerHeight;
+                if (rafId) cancelAnimationFrame(rafId);
 
-                newLeft = Math.max(0, Math.min(newLeft, viewportWidth - rect.width));
-                newTop = Math.max(0, Math.min(newTop, viewportHeight - rect.height));
+                rafId = requestAnimationFrame(() => {
+                    let newLeft = startLeft + dx;
+                    let newTop = startTop + dy;
 
-                this.chatContainer.style.left = `${newLeft}px`;
-                this.chatContainer.style.top = `${newTop}px`;
-                this.chatContainer.style.right = 'auto';
-                this.chatContainer.style.bottom = 'auto';
+                    // Improved Clamping Logic
+                    newLeft = Math.max(0, Math.min(newLeft, viewportWidth - containerWidth));
+                    newTop = Math.max(0, Math.min(newTop, viewportHeight - containerHeight));
+
+                    this.chatContainer.style.left = `${newLeft}px`;
+                    this.chatContainer.style.top = `${newTop}px`;
+                    this.chatContainer.style.right = 'auto';
+                    this.chatContainer.style.bottom = 'auto';
+                });
             }
         };
 
         const onEnd = () => {
             isDragging = false;
             this.chatContainer.classList.remove('dragging');
-
-            // If we didn't move much, it's a click, trigger toggle
-            if (!hasMoved) {
-                // The toggle logic is handled by the click listener on chatHeader
-                // but we might need to suppress it if we actually dragged.
-            } else {
-                // If we moved, we should probably prevent the next click event from bubbling
-                // but since we're using separate listeners, we can just check 'hasMoved' in the toggleChat
-            }
+            if (rafId) cancelAnimationFrame(rafId);
 
             document.removeEventListener('mousemove', onMove);
             document.removeEventListener('mouseup', onEnd);
@@ -464,23 +466,6 @@ class GomokuApp {
         this.chatHeader.addEventListener('mousedown', onStart);
         this.chatHeader.addEventListener('touchstart', onStart, { passive: false });
 
-        // Update toggleChat to check for hasMoved
-        const originalToggleChat = (e) => {
-            if (hasMoved) return; // Don't toggle if we just finished dragging
-            if (e) e.stopPropagation();
-            if (!this.chatContainer) return;
-            const isCollapsed = this.chatContainer.classList.toggle('collapsed');
-            if (this.btnToggleChat) {
-                this.btnToggleChat.textContent = isCollapsed ? '💬' : '✕';
-            }
-        };
-
-        // Replace the existing click listener or adjust it
-        // In the constructor, I already added a click listener. 
-        // I will refactor the constructor to use this logic or just override it here.
-        // Actually, better to just modify the constructor logic directly or use a flag.
-
-        // Let's store hasMoved on the instance so the toggle logic can see it
         this._isDraggingMove = () => hasMoved;
     }
 }
