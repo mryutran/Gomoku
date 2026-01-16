@@ -55,6 +55,12 @@ class GomokuApp {
             if (e) e.stopPropagation();
             if (!this.chatContainer) return;
             const isCollapsed = this.chatContainer.classList.toggle('collapsed');
+
+            // Clear unread state when opening
+            if (!isCollapsed) {
+                this.chatContainer.classList.remove('unread');
+            }
+
             if (this.btnToggleChat) {
                 this.btnToggleChat.textContent = isCollapsed ? '💬' : '✕';
             }
@@ -226,13 +232,19 @@ class GomokuApp {
         const messages = Object.values(chatData).sort((a, b) => a.timestamp - b.timestamp);
         messages.forEach(msg => {
             if (msg.timestamp > this.lastChatTimestamp) {
+                const isMe = msg.senderId === this.network.playerId;
                 const msgEl = document.createElement('div');
-                msgEl.className = `chat-message ${msg.senderId === this.network.playerId ? 'me' : 'others'}`;
+                msgEl.className = `chat-message ${isMe ? 'me' : 'others'}`;
                 // Use cleaner formatting
                 msgEl.innerHTML = `<strong>${msg.senderName}:</strong> ${msg.text}`;
                 this.chatMessages.appendChild(msgEl);
                 this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
                 this.lastChatTimestamp = msg.timestamp;
+
+                // Handle unread notification
+                if (!isMe && this.chatContainer.classList.contains('collapsed')) {
+                    this.chatContainer.classList.add('unread');
+                }
             }
         });
     }
@@ -401,14 +413,21 @@ class GomokuApp {
             startY = clientY;
 
             const rect = this.chatContainer.getBoundingClientRect();
-            startLeft = rect.left;
-            startTop = rect.top;
+            // Start positions relative to the document
+            startLeft = rect.left + window.scrollX;
+            startTop = rect.top + window.scrollY;
             containerWidth = rect.width;
             containerHeight = rect.height;
 
             // Cache viewport dimensions
             viewportWidth = window.innerWidth;
             viewportHeight = window.innerHeight;
+
+            // On mobile, use visualViewport if available for better accuracy with browser UI
+            if (window.visualViewport) {
+                viewportWidth = window.visualViewport.width;
+                viewportHeight = window.visualViewport.height;
+            }
 
             this.chatContainer.classList.add('dragging');
 
@@ -437,15 +456,24 @@ class GomokuApp {
                 if (rafId) cancelAnimationFrame(rafId);
 
                 rafId = requestAnimationFrame(() => {
-                    let newLeft = startLeft + dx;
-                    let newTop = startTop + dy;
+                    // Calculate new position relative to document
+                    let docNewLeft = startLeft + dx;
+                    let docNewTop = startTop + dy;
 
-                    // Improved Clamping Logic
-                    newLeft = Math.max(0, Math.min(newLeft, viewportWidth - containerWidth));
-                    newTop = Math.max(0, Math.min(newTop, viewportHeight - containerHeight));
+                    // Calculate viewport-relative position for clamping
+                    const scrollX = window.scrollX;
+                    const scrollY = window.scrollY;
 
-                    this.chatContainer.style.left = `${newLeft}px`;
-                    this.chatContainer.style.top = `${newTop}px`;
+                    let viewLeft = docNewLeft - scrollX;
+                    let viewTop = docNewTop - scrollY;
+
+                    // Improved Clamping Logic (relative to viewport)
+                    viewLeft = Math.max(0, Math.min(viewLeft, viewportWidth - containerWidth));
+                    viewTop = Math.max(0, Math.min(viewTop, viewportHeight - containerHeight));
+
+                    // Convert back to document-relative for style.top/left
+                    this.chatContainer.style.left = `${viewLeft + scrollX}px`;
+                    this.chatContainer.style.top = `${viewTop + scrollY}px`;
                     this.chatContainer.style.right = 'auto';
                     this.chatContainer.style.bottom = 'auto';
                 });
