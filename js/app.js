@@ -51,6 +51,7 @@ class GomokuApp {
         this.btnToggleChat = document.getElementById('btn-toggle-chat');
 
         const toggleChat = (e) => {
+            if (this._isDraggingMove && this._isDraggingMove()) return;
             if (e) e.stopPropagation();
             if (!this.chatContainer) return;
             const isCollapsed = this.chatContainer.classList.toggle('collapsed');
@@ -85,6 +86,7 @@ class GomokuApp {
         });
 
         this.previousPlayers = null;
+        this.setupDraggable();
         this.initEventListeners();
         this.renderBoard();
     }
@@ -370,6 +372,116 @@ class GomokuApp {
                 this.boardEl.appendChild(cell);
             }
         }
+    }
+
+    setupDraggable() {
+        if (!this.chatContainer || !this.chatHeader) return;
+
+        let isDragging = false;
+        let startX, startY;
+        let startLeft, startTop;
+        let hasMoved = false;
+
+        const onStart = (e) => {
+            // Only allow dragging from header
+            if (e.target.closest('#btn-toggle-chat')) return;
+
+            isDragging = true;
+            hasMoved = false;
+
+            const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+
+            startX = clientX;
+            startY = clientY;
+
+            const rect = this.chatContainer.getBoundingClientRect();
+            startLeft = rect.left;
+            startTop = rect.top;
+
+            // Switch to fixed positioning with left/top for easier dragging
+            // but only after a small movement to avoid breaking the initial CSS layout immediately
+            this.chatContainer.classList.add('dragging');
+
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onEnd);
+            document.addEventListener('touchmove', onMove, { passive: false });
+            document.addEventListener('touchend', onEnd);
+        };
+
+        const onMove = (e) => {
+            if (!isDragging) return;
+
+            const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+
+            const dx = clientX - startX;
+            const dy = clientY - startY;
+
+            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+                hasMoved = true;
+                if (e.cancelable) e.preventDefault();
+            }
+
+            if (hasMoved) {
+                let newLeft = startLeft + dx;
+                let newTop = startTop + dy;
+
+                // Clamping
+                const rect = this.chatContainer.getBoundingClientRect();
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+
+                newLeft = Math.max(0, Math.min(newLeft, viewportWidth - rect.width));
+                newTop = Math.max(0, Math.min(newTop, viewportHeight - rect.height));
+
+                this.chatContainer.style.left = `${newLeft}px`;
+                this.chatContainer.style.top = `${newTop}px`;
+                this.chatContainer.style.right = 'auto';
+                this.chatContainer.style.bottom = 'auto';
+            }
+        };
+
+        const onEnd = () => {
+            isDragging = false;
+            this.chatContainer.classList.remove('dragging');
+
+            // If we didn't move much, it's a click, trigger toggle
+            if (!hasMoved) {
+                // The toggle logic is handled by the click listener on chatHeader
+                // but we might need to suppress it if we actually dragged.
+            } else {
+                // If we moved, we should probably prevent the next click event from bubbling
+                // but since we're using separate listeners, we can just check 'hasMoved' in the toggleChat
+            }
+
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onEnd);
+            document.removeEventListener('touchmove', onMove);
+            document.removeEventListener('touchend', onEnd);
+        };
+
+        this.chatHeader.addEventListener('mousedown', onStart);
+        this.chatHeader.addEventListener('touchstart', onStart, { passive: false });
+
+        // Update toggleChat to check for hasMoved
+        const originalToggleChat = (e) => {
+            if (hasMoved) return; // Don't toggle if we just finished dragging
+            if (e) e.stopPropagation();
+            if (!this.chatContainer) return;
+            const isCollapsed = this.chatContainer.classList.toggle('collapsed');
+            if (this.btnToggleChat) {
+                this.btnToggleChat.textContent = isCollapsed ? '💬' : '✕';
+            }
+        };
+
+        // Replace the existing click listener or adjust it
+        // In the constructor, I already added a click listener. 
+        // I will refactor the constructor to use this logic or just override it here.
+        // Actually, better to just modify the constructor logic directly or use a flag.
+
+        // Let's store hasMoved on the instance so the toggle logic can see it
+        this._isDraggingMove = () => hasMoved;
     }
 }
 

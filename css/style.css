@@ -393,6 +393,15 @@ input[type="text"]:focus {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 50;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    user-select: none;
+    /* Prevent text selection while dragging */
+}
+
+.chat-container.dragging {
+    transition: none;
+    /* Disable transition while dragging for performance */
+    opacity: 0.9;
+    cursor: grabbing;
 }
 
 .chat-container.collapsed {
@@ -409,7 +418,10 @@ input[type="text"]:focus {
     align-items: center;
     font-weight: 700;
     font-size: 0.9rem;
-    cursor: pointer;
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+    /* Prevent scrolling while dragging header */
 }
 
 .chat-container.collapsed .chat-header {
@@ -767,6 +779,8 @@ input[type="text"]:focus {
         left: 5%;
         right: 5%;
         bottom: 70px;
+        /* Default mobile position reset to allow dragging logic to take over cleanly */
+        max-height: 50vh;
     }
 
     .chat-container.collapsed {
