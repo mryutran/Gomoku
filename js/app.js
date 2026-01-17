@@ -189,7 +189,7 @@ class GomokuApp {
                 this.game.placeStone(r, c, player);
             });
         }
-        this.renderBoard();
+        this.renderBoard(data.lastMove);
 
         // Detect player departure
         if (this.previousPlayers && data.status !== 'waiting') {
@@ -367,7 +367,7 @@ class GomokuApp {
         }
     }
 
-    renderBoard() {
+    renderBoard(lastMove = null) {
         this.boardEl.innerHTML = '';
         const boardState = this.game.getBoardState();
 
@@ -377,6 +377,10 @@ class GomokuApp {
                 cell.className = 'cell';
                 cell.dataset.row = r;
                 cell.dataset.col = c;
+
+                if (lastMove && lastMove.row === r && lastMove.col === c) {
+                    cell.classList.add('last-move');
+                }
 
                 const player = boardState[r][c];
                 if (player) {

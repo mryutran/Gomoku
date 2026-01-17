@@ -102,6 +102,7 @@ export class NetworkManager {
         const updates = {};
         updates[`board/${row}_${col}`] = player;
         updates['turn'] = (player === 'p1' ? 'p2' : 'p1');
+        updates['lastMove'] = { row, col, player };
 
         await update(this.roomRef, updates);
     }
